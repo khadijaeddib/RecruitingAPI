@@ -33,56 +33,6 @@ namespace RecruitingAPI.Controllers
             return Ok(companies);
         }
 
-       /* [HttpGet("GetCompanieswithimage")]
-        public IEnumerable<Company> GetProductwithimage()
-        {
-            List<Company> _list = new List<Company>();
-            var _company = _context.Companies.ToList();
-            if (_company != null && _company.Count > 0)
-            {
-                _company.ForEach(item =>
-                {
-                    _list.Add(new Company()
-                    {
-                        logoImage = GetImagebycode(item.Code),
-                        name = company.name,
-                        website = company.website,
-                        businessSector = company.businessSector,
-                        description = company.description,
-                        phone = company.phone,
-                        email = company.email,
-                        address = company.address
-
-                        Code = item.Code,
-                        Name = item.Name,
-                        Amount = item.Amount,
-                        ProductImage = GetImagebycode(item.Code)
-                    });
-
-                });
-
-            }
-            return _list;
-        }*/
-
-
-        /*[HttpPost("addCompany")]
-        public async Task<IActionResult> Post([FromForm] Company company)
-        {
-            if (company.logoImage != null)
-            {
-                var filePath = Path.Combine("wwwroot", "images", company.logoImage.FileName);
-                using (var stream = System.IO.File.Create(filePath))
-                {
-                    await company.logoImage.CopyToAsync(stream);
-                }
-                company.logoPath = $"/images/{company.logoImage.FileName}";
-            }
-            _context.Companies.Add(company);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = company.idCo }, company);
-        }*/
-
 
         [HttpPost("addCompany")]
         public async Task<IActionResult> Post([FromForm] Company company)
@@ -111,7 +61,12 @@ namespace RecruitingAPI.Controllers
                         description = company.description,
                         phone = company.phone,
                         email = company.email,
-                        address = company.address
+                        address = company.address,
+                        rc = company.rc,
+                        idF = company.idF,
+                        ice = company.ice,
+                        legalStatus = company.legalStatus
+
                     };
                     _context.Companies.Add(data);
                     _context.SaveChanges();
@@ -196,41 +151,6 @@ namespace RecruitingAPI.Controllers
             return company;
         }
 
-
-        [HttpPut("updateCompany/{id}")]
-        public async Task<IActionResult> Put(int id, [FromForm] Company company)
-        {
-            if (id != company.idCo)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(company).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CompanyExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        private bool CompanyExists(int id)
-        {
-            return _context.Companies.Any(e => e.idCo == id);
-        }
-
         [HttpPost("editCompany/{id}")]
         public async Task<IActionResult> Edit(int id, [FromForm] Company company)
         {
@@ -261,6 +181,10 @@ namespace RecruitingAPI.Controllers
                     data.phone = company.phone;
                     data.email = company.email;
                     data.address = company.address;
+                    data.rc = company.rc;
+                    data.idF = company.idF;
+                    data.ice = company.ice;
+                    data.legalStatus = company.legalStatus;
 
                     if (company.logoImage != null)
                     {
@@ -281,9 +205,6 @@ namespace RecruitingAPI.Controllers
                 return BadRequest(ModelState);
             }
         }
-
-
-
 
     }
 }

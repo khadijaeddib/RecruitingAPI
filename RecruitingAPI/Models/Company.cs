@@ -28,6 +28,15 @@ namespace RecruitingAPI.Models
         [EmailAddress]
         public string email { get; set; } 
 
-        public string address { get; set; } 
+        public string address { get; set; }
+
+        public string rc { get; set; }
+
+        public string idF { get; set; }
+
+        public string ice { get; set; }
+
+        public string legalStatus { get; set; }
+
     }
 }

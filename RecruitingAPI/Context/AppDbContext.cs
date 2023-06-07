@@ -11,7 +11,13 @@ namespace RecruitingAPI.Context
         }
         public DbSet<Company> Companies { get; set; }
 
-        /*public DbSet<Candidate> Candidates { get; set; }*/
+        public DbSet<Candidate> Candidates { get; set; }
+
+        public DbSet<Admin> Admins { get; set; }
+
+        public DbSet<Recruiter> Recruiters { get; set; }
+
+
 
         /* protected override void OnModelCreating(ModelBuilder modelBuilder)
          {

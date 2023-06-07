@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecruitingAPI.Context;
 
@@ -10,9 +11,11 @@ using RecruitingAPI.Context;
 namespace RecruitingAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230520150524_Admin")]
+    partial class Admin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,62 +142,6 @@ namespace RecruitingAPI.Migrations
                     b.HasKey("idCo");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("RecruitingAPI.Models.Recruiter", b =>
-                {
-                    b.Property<int>("idRec")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("idRec"));
-
-                    b.Property<string>("address")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("age")
-                        .HasColumnType("int");
-
-                    b.Property<string>("email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("fName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("idCo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("lName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("pass")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("phone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("recImagePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("role")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("idRec");
-
-                    b.HasIndex("idCo");
-
-                    b.ToTable("Recruiters");
-                });
-
-            modelBuilder.Entity("RecruitingAPI.Models.Recruiter", b =>
-                {
-                    b.HasOne("RecruitingAPI.Models.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("idCo")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
                 });
 #pragma warning restore 612, 618
         }
