@@ -26,7 +26,7 @@ namespace RecruitingAPI.Controllers
                 {
                     var data = new Candidature()
                     {
-                        statut = candidature.statut,
+                        status = candidature.status,
                         dateCand = candidature.dateCand,
                         motivation = candidature.motivation,
                         idCand = candidature.idCand,
@@ -112,7 +112,7 @@ namespace RecruitingAPI.Controllers
                     {
                         return NotFound(new { Message = "Candidature not found" });
                     }
-                    data.statut = candidature.statut;
+                    data.status = candidature.status;
                     _context.Candidatures.Update(data);
                     await _context.SaveChangesAsync();
                     return Ok(new { Message = "Candidature updated" });

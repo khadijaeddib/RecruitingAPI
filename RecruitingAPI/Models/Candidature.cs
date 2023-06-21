@@ -8,7 +8,7 @@ namespace RecruitingAPI.Models
         [Key]
         public int idCandidature { get; set; }
 
-        public string statut { get; set; }
+        public string status { get; set; }
 
         public DateTime dateCand { get; set; }
 
