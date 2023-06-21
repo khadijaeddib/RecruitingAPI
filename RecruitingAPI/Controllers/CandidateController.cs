@@ -32,9 +32,16 @@ namespace RecruitingAPI.Controllers
         }*/
 
         [HttpGet("getCandidates")]
-        public IActionResult Get(int pageSize = 5)
+        public IActionResult GetCandidates(int pageSize = 5)
         {
             var candidates = _context.Candidates.Take(pageSize).ToList();
+            return Ok(candidates);
+        }
+
+        [HttpGet("getAllCandidates")]
+        public IActionResult getAllCandidates()
+        {
+            var candidates = _context.Candidates.ToList();
             return Ok(candidates);
         }
 
@@ -194,16 +201,13 @@ namespace RecruitingAPI.Controllers
             }
         }
 
-
         private string UploadImage(Candidate candidate)
         {
             string uniqueImageName = string.Empty;
             string filePath = string.Empty;
 
-
             if (candidate.candImage != null)
             {
-
                 var ext = Path.GetExtension(candidate.candImage.FileName);
                 var allowedExtensions = new string[] { ".png", ".jpg", ".jpeg" };
                 if (!allowedExtensions.Contains(ext))
@@ -230,10 +234,8 @@ namespace RecruitingAPI.Controllers
             string uniqueLMName = string.Empty;
             string filePath = string.Empty;
 
-
             if (candidate.lmFile != null)
             {
-
                 var ext = Path.GetExtension(candidate.lmFile.FileName);
                 var allowedExtensions = new string[] { ".pdf" };
                 if (!allowedExtensions.Contains(ext))
@@ -260,10 +262,8 @@ namespace RecruitingAPI.Controllers
             string uniqueCVName = string.Empty;
             string filePath = string.Empty;
 
-
             if (candidate.cvFile != null)
             {
-
                 var ext = Path.GetExtension(candidate.cvFile.FileName);
                 var allowedExtensions = new string[] { ".pdf" };
                 if (!allowedExtensions.Contains(ext))
@@ -392,5 +392,4 @@ namespace RecruitingAPI.Controllers
         }*/
 
     }
-
 }

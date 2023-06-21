@@ -67,23 +67,20 @@ namespace RecruitingAPI.Controllers
 
             if (user != null)
             {
-                byte[] keyBytes = new byte[32]; // 32 bytes = 256 bits
+               /* byte[] keyBytes = new byte[32]; // 32 bytes = 256 bits
                 using (var rng = new RNGCryptoServiceProvider())
                 {
                     rng.GetBytes(keyBytes);
                 }
-                string key = Convert.ToBase64String(keyBytes);
-
+                string key = Convert.ToBase64String(keyBytes);*/
                 // Generate JWT token
-                var token = GenerateJwtToken(user, role, key);
+                var token = GenerateJwtToken(user, role);
                 
                 return Ok(new { Message = $"{role} login successfully", Token = token , role,  user});
             }else
             {
                 return BadRequest(new { Message = "Invalid email or password" });
             }
-
-            
         }
 
 
@@ -274,12 +271,8 @@ namespace RecruitingAPI.Controllers
             return Ok(new { Message = "Logout successful" });
         }
 
-
-
-
         public class PasswordHasher
         {
-
             /*public static string Hash(string password, string salt)
             {
                 
@@ -289,20 +282,16 @@ namespace RecruitingAPI.Controllers
                 var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, _hashAlgorithmName, KeySize);
                 return string.Join(SaltDelimeter, Convert.ToBase64String(salt), Convert.ToBase64String(hash));*//*
             }*/
-
             public static bool Validate(string password, string passwordHash)
             {
                 return BCrypt.Net.BCrypt.Verify(password, passwordHash );
             }
         }
 
-
-        private string GenerateJwtToken(object user, string role, string key)
+        private string GenerateJwtToken(object user, string role)
         {
-           /* key = Convert.ToBase64String(Guid.NewGuid().ToByteArray());*/
-
-            var keyBytes = Convert.FromBase64String(key);
-            var signingKey = new SymmetricSecurityKey(keyBytes);
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+            var signingKey = new SymmetricSecurityKey(key);
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -310,11 +299,14 @@ namespace RecruitingAPI.Controllers
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Role, role),
-                    new Claim(ClaimTypes.Email, GetEmailFromUser(user))
+                    new Claim(ClaimTypes.Email, GetEmailFromUser(user)),
+                    new Claim(ClaimTypes.NameIdentifier, GetIdFromUser(user))
                     // Add additional claims specific to the user type
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = signingCredentials
+                SigningCredentials = signingCredentials,
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"]
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -336,7 +328,6 @@ namespace RecruitingAPI.Controllers
             }
 
             _context.SaveChanges();
-
             return tokenString;
         }
 
@@ -358,15 +349,30 @@ namespace RecruitingAPI.Controllers
             return string.Empty;
         }
 
+        private string GetIdFromUser(object user)
+        {
+            if (user is Candidate candidate)
+            {
+                return candidate.idCand.ToString();
+            }
+            else if (user is Admin admin)
+            {
+                return admin.idAdmin.ToString();
+            }
+            else if (user is Recruiter recruiter)
+            {
+                return recruiter.idRec.ToString();
+            }
+            return null;
+        }
+
         private string UploadImage(Candidate candidate)
         {
             string uniqueImageName = string.Empty;
             string filePath = string.Empty;
 
-
             if (candidate.candImage != null)
             {
-
                 var ext = Path.GetExtension(candidate.candImage.FileName);
                 var allowedExtensions = new string[] { ".png", ".jpg", ".jpeg" };
                 if (!allowedExtensions.Contains(ext))
@@ -393,10 +399,8 @@ namespace RecruitingAPI.Controllers
             string uniqueLMName = string.Empty;
             string filePath = string.Empty;
 
-
             if (candidate.lmFile != null)
             {
-
                 var ext = Path.GetExtension(candidate.lmFile.FileName);
                 var allowedExtensions = new string[] { ".pdf" };
                 if (!allowedExtensions.Contains(ext))
@@ -423,10 +427,8 @@ namespace RecruitingAPI.Controllers
             string uniqueCVName = string.Empty;
             string filePath = string.Empty;
 
-
             if (candidate.cvFile != null)
             {
-
                 var ext = Path.GetExtension(candidate.cvFile.FileName);
                 var allowedExtensions = new string[] { ".pdf" };
                 if (!allowedExtensions.Contains(ext))
@@ -453,10 +455,8 @@ namespace RecruitingAPI.Controllers
             string uniqueImageName = string.Empty;
             string filePath = string.Empty;
 
-
             if (recruiter.recImage != null)
             {
-
                 var ext = Path.GetExtension(recruiter.recImage.FileName);
                 var allowedExtensions = new string[] { ".png", ".jpg", ".jpeg" };
                 if (!allowedExtensions.Contains(ext))
@@ -477,8 +477,5 @@ namespace RecruitingAPI.Controllers
             }
             return uniqueImageName;
         }
-
-
-
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using RecruitingAPI.Context;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,7 +16,37 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+/*builder.Services.AddSwaggerGen();*/
+
+
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "RecruitingAPI.App",
+        Version = "v1"
+    });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below. \r\n\r\nExample: Bearer 1safs"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme {
+                Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 using var hmac = new HMACSHA256();
 var key = Convert.ToBase64String(hmac.Key);
@@ -24,19 +55,23 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;//new added
 }).AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
+    options.SaveToken = true;//new
+    options.RequireHttpsMetadata = false;//new
+    options.TokenValidationParameters = new TokenValidationParameters()//() added
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
+        ValidateIssuer = true,//change it to false
+        ValidateAudience = true,//change it to false
+        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-       /* IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))*/
-
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+        ClockSkew = TimeSpan.Zero//added
     };
+
 });//sixth
 
 /*builder.Services.AddAuthentication(options => {
@@ -95,7 +130,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+app.UseCors(myOrigins); //third
+
 app.UseAuthentication(); //fourth
+
+app.UseAuthorization();
 
 app.UseStaticFiles(); //fifth
 
@@ -112,9 +153,6 @@ app.UseStaticFiles(); //fifth
     RequestPath = "/wwwroot"
 }); //fifth*/
 
-app.UseAuthorization();
-
-app.UseCors(myOrigins); //third
 
 app.MapControllers();
 

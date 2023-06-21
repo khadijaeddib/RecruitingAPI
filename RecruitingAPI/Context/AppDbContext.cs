@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecruitingAPI.Models;
+using System.Reflection;
 
 namespace RecruitingAPI.Context
 {
@@ -17,11 +20,33 @@ namespace RecruitingAPI.Context
 
         public DbSet<Recruiter> Recruiters { get; set; }
 
+        public DbSet<Offer> Offers { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            var splitStringConverter = new ValueConverter<string[], string>(
+                v => string.Join(';', v),
+                v => v.Split(';', StringSplitOptions.RemoveEmptyEntries));
 
-        /* protected override void OnModelCreating(ModelBuilder modelBuilder)
-         {
-             modelBuilder.Entity<Candidate>().ToTable("Candidates");
-         }*/
+            var splitStringValueComparer = new ValueComparer<string[]>(
+                (c1, c2) => c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToArray());
+
+            modelBuilder.Entity<Offer>()
+                .Property(e => e.skills)
+                .HasConversion(splitStringConverter, splitStringValueComparer);
+
+            modelBuilder.Entity<Offer>()
+                .Property(e => e.missions)
+                .HasConversion(splitStringConverter, splitStringValueComparer);
+
+            modelBuilder.Entity<Offer>()
+                .Property(e => e.languages)
+                .HasConversion(splitStringConverter, splitStringValueComparer);
+        }
+
+        public DbSet<Candidature> Candidatures { get; set; }
+
     }
 }

@@ -37,6 +37,7 @@ namespace RecruitingAPI.Models
         [ForeignKey("idCo")]
         public Company Company { get; set; }
 
+        [MaxLength(1000)]
         public string token { get; set; }
 
     }

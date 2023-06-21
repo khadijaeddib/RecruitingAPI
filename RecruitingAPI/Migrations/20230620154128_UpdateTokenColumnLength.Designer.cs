@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecruitingAPI.Context;
 
@@ -11,9 +12,11 @@ using RecruitingAPI.Context;
 namespace RecruitingAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230620154128_UpdateTokenColumnLength")]
+    partial class UpdateTokenColumnLength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,38 +113,6 @@ namespace RecruitingAPI.Migrations
                     b.HasKey("idCand");
 
                     b.ToTable("Candidates");
-                });
-
-            modelBuilder.Entity("RecruitingAPI.Models.Candidature", b =>
-                {
-                    b.Property<int>("idCandidature")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("idCandidature"));
-
-                    b.Property<DateTime>("dateCand")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("idCand")
-                        .HasColumnType("int");
-
-                    b.Property<int>("idOffer")
-                        .HasColumnType("int");
-
-                    b.Property<string>("motivation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("statut")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("idCandidature");
-
-                    b.HasIndex("idCand");
-
-                    b.HasIndex("idOffer");
-
-                    b.ToTable("Candidatures");
                 });
 
             modelBuilder.Entity("RecruitingAPI.Models.Company", b =>
@@ -309,25 +280,6 @@ namespace RecruitingAPI.Migrations
                     b.HasIndex("idCo");
 
                     b.ToTable("Recruiters");
-                });
-
-            modelBuilder.Entity("RecruitingAPI.Models.Candidature", b =>
-                {
-                    b.HasOne("RecruitingAPI.Models.Candidate", "Candidate")
-                        .WithMany()
-                        .HasForeignKey("idCand")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RecruitingAPI.Models.Offer", "Offer")
-                        .WithMany()
-                        .HasForeignKey("idOffer")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Candidate");
-
-                    b.Navigation("Offer");
                 });
 
             modelBuilder.Entity("RecruitingAPI.Models.Offer", b =>

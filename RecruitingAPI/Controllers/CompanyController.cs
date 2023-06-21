@@ -33,7 +33,6 @@ namespace RecruitingAPI.Controllers
             return Ok(companies);
         }
 
-
         [HttpPost("addCompany")]
         public async Task<IActionResult> Post([FromForm] Company company)
         {
@@ -81,14 +80,10 @@ namespace RecruitingAPI.Controllers
             return BadRequest(new { Message = "Failed to add company" });
         }
 
-
         private string UploadImage(Company company)
         {
             string uniqueFileName = string.Empty;
-
             string filePath = string.Empty;
-
-
 
             if (company.logoImage != null)
             {
