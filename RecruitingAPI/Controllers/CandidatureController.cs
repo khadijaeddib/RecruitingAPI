@@ -41,23 +41,34 @@ namespace RecruitingAPI.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
+                return BadRequest(new { Error = ex.InnerException?.ToString() ?? ex.Message });
             }
-            return BadRequest(new { Message = "Failed to add candidature" });
+
+            return BadRequest(new { Error = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).FirstOrDefault() });
         }
 
         [HttpGet("getAllCandidatures")]
-        public async Task<IActionResult> GetAllCandidatures()
+        public IActionResult GetAllCandidatures(int pageSize = 5)
         {
-            try
-            {
-                var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).ToList();
+                var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).Take(pageSize).ToList();
                 return Ok(candidatures);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return BadRequest(new { Message = "Failed to get all candidatures" });
-            }
+        }
+
+        [HttpGet("getCandidateCandidatures/{id}")]
+        public IActionResult GetCandidateCandidatures(int id, int pageSize = 5)
+        {
+            var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).Where(c => c.idCand == id).Take(pageSize).ToList();
+
+            return Ok(candidatures);
+        }
+
+        [HttpGet("getRecruiterCandidatures/{id}")]
+        public IActionResult GetRecruiterCandidatures(int id, int pageSize = 5)
+        {
+            var offers = _context.Offers.Where(o => o.idRec == id).Select(o => o.idOffer);
+            var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).Where(c => offers.Contains(c.idOffer)).Take(pageSize).ToList();
+
+            return Ok(candidatures);
         }
 
         [HttpGet("getCandidature/{id}")]

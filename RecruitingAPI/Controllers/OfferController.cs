@@ -89,6 +89,13 @@ namespace RecruitingAPI.Controllers
             return Ok(offers);
         }
 
+        [HttpGet("getRecruiterOffers/{id}")]
+        public IActionResult getRecruiterOffers(int id)
+        {
+            var offers = _context.Offers.Include(o => o.Recruiter).Where(o => o.idRec == id).ToList();
+
+            return Ok(offers);
+        }
 
         [HttpGet("getOffer/{id}")]
         public async Task<ActionResult<Offer>> Get(int id)
@@ -143,7 +150,6 @@ namespace RecruitingAPI.Controllers
                     data.languages = offer.languages;
                     data.pubDate = offer.pubDate;
                     data.endDate = offer.endDate;
-                    data.idRec = offer.idRec;
 
                     _context.Offers.Update(data);
                     _context.SaveChanges();
