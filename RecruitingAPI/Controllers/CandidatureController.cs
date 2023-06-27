@@ -54,10 +54,25 @@ namespace RecruitingAPI.Controllers
                 return Ok(candidatures);
         }
 
+        [HttpGet("getCandidatures")]
+        public IActionResult getCandidatures()
+        {
+            var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).ToList();
+            return Ok(candidatures);
+        }
+
         [HttpGet("getCandidateCandidatures/{id}")]
         public IActionResult GetCandidateCandidatures(int id, int pageSize = 5)
         {
             var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).Where(c => c.idCand == id).Take(pageSize).ToList();
+
+            return Ok(candidatures);
+        }
+
+        [HttpGet("getAllCandidateCandidatures/{id}")]
+        public IActionResult GetAllCandidateCandidatures(int id)
+        {
+            var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).Where(c => c.idCand == id).ToList();
 
             return Ok(candidatures);
         }
@@ -67,6 +82,15 @@ namespace RecruitingAPI.Controllers
         {
             var offers = _context.Offers.Where(o => o.idRec == id).Select(o => o.idOffer);
             var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).Where(c => offers.Contains(c.idOffer)).Take(pageSize).ToList();
+
+            return Ok(candidatures);
+        }
+
+        [HttpGet("getAllRecruiterCandidatures/{id}")]
+        public IActionResult GetAllRecruiterCandidatures(int id)
+        {
+            var offers = _context.Offers.Where(o => o.idRec == id).Select(o => o.idOffer);
+            var candidatures = _context.Candidatures.Include(c => c.Candidate).Include(c => c.Offer).Where(c => offers.Contains(c.idOffer)).ToList();
 
             return Ok(candidatures);
         }

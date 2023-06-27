@@ -48,6 +48,16 @@ namespace RecruitingAPI.Controllers
             return Ok(candidates);
         }
 
+        [HttpGet("getAllRecruiterCandidates/{id}")]
+        public IActionResult GetAllRecruiterCandidates(int id)
+        {
+            var offers = _context.Offers.Where(o => o.idRec == id).Select(o => o.idOffer);
+            var candidatures = _context.Candidatures.Where(c => offers.Contains(c.idOffer)).Select(c => c.idCand);
+            var candidates = _context.Candidates.Where(c => candidatures.Contains(c.idCand)).ToList();
+
+            return Ok(candidates);
+        }
+
         [HttpGet("getAllCandidates")]
         public IActionResult getAllCandidates()
         {

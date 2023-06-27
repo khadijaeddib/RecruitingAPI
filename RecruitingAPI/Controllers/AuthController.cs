@@ -262,6 +262,22 @@ namespace RecruitingAPI.Controllers
 
         }
 
+        [HttpPost("incrementVisitorCounter")]
+        public async Task<IActionResult> IncrementVisitorCounter()
+        {
+            var visitor = new Visitor { VisitDate = DateTime.Now };
+            _context.Visitors.Add(visitor);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpGet("getTotalVisitors")]
+        public async Task<IActionResult> GetTotalVisitors()
+        {
+            var totalVisitors = await _context.Visitors.CountAsync();
+            return Ok(totalVisitors);
+        }
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {

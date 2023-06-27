@@ -17,7 +17,7 @@ namespace RecruitingAPI.Migrations
                 {
                     idCandidature = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    statut = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     dateCand = table.Column<DateTime>(type: "datetime2", nullable: false),
                     motivation = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     idCand = table.Column<int>(type: "int", nullable: false),

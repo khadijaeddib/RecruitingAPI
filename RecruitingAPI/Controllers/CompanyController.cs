@@ -42,12 +42,12 @@ namespace RecruitingAPI.Controllers
                 {
 
                     var ext = Path.GetExtension(company.logoImage.FileName);
-                    var allowedExtensions = new string[] { ".png" };
+                    var allowedExtensions = new string[] { ".png", ".jpg", ".jpeg" };
 
                     if (!allowedExtensions.Contains(ext))
                     {
-                        ModelState.AddModelError(string.Empty, "Only .png extensions is allowed");
-                        return BadRequest(new { Message = "Failed to add company; Only .png extensions is allowed" });
+                        ModelState.AddModelError(string.Empty, "Only .png, .jpg, .jpeg extensions are allowed");
+                        return BadRequest(new { Message = "Failed to add company; Only .png, .jpg, .jpeg extensions are allowed" });
                     }
 
                     string uniqueFileName = UploadImage(company);
@@ -89,10 +89,10 @@ namespace RecruitingAPI.Controllers
             {
 
                 var ext = Path.GetExtension(company.logoImage.FileName);
-                var allowedExtensions = new string[] {".png" };
+                var allowedExtensions = new string[] { ".png", ".jpg", ".jpeg" };
                 if (!allowedExtensions.Contains(ext))
                 {
-                    ModelState.AddModelError(string.Empty, "Only .png extensions is allowed");
+                    ModelState.AddModelError(string.Empty, "Only .png, .jpg, .jpeg extensions are allowed");
                     Console.WriteLine("Only .png extensions is allowed");
                 }else
                 { 
