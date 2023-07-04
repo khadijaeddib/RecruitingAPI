@@ -48,6 +48,8 @@ namespace RecruitingAPI.Context
 
         public DbSet<Candidature> Candidatures { get; set; }
         public DbSet<Visitor> Visitors { get; set; }
+        public DbSet<Interview> Interviews { get; set; }
+
 
     }
 }
