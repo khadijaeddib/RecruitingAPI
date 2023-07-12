@@ -114,11 +114,22 @@ namespace RecruitingAPI.Controllers
             }
         }
 
+        [HttpGet("hasApplied/{candidateId}/{offerId}")]
+        public IActionResult HasApplied(int candidateId, int offerId)
+        {
+            var hasApplied = _context.Candidatures.Any(c => c.idCand == candidateId && c.idOffer == offerId);
+            return Ok(hasApplied);
+        }
+
         [HttpDelete("deleteCandidature/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
+                var interviews = _context.Interviews.Where(i => i.idCandidature == id);
+                _context.Interviews.RemoveRange(interviews);
+                await _context.SaveChangesAsync();
+
                 var candidature = await _context.Candidatures.FindAsync(id);
                 if (candidature == null)
                 {

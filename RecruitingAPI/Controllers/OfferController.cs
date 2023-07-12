@@ -113,6 +113,10 @@ namespace RecruitingAPI.Controllers
         [HttpDelete("deleteOffer/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var interviews = _context.Interviews.Where(i => i.Candidature.idOffer == id);
+            _context.Interviews.RemoveRange(interviews);
+            await _context.SaveChangesAsync();
+
             var offer = await _context.Offers.FindAsync(id);
             if (offer == null)
             {

@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using BCrypt.Net;
 using System.Data;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using MimeKit;
 
 namespace RecruitingAPI.Controllers
 {
@@ -30,7 +31,6 @@ namespace RecruitingAPI.Controllers
             _configuration = configuration;
             _environment = environment;
         }
-
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] Login login)
@@ -83,6 +83,49 @@ namespace RecruitingAPI.Controllers
             }
         }
 
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword([FromForm] ResetPassword resetPassword)
+        {
+            // Check if email exists in the database
+            var candidate = await _context.Candidates.FirstOrDefaultAsync(c => c.email == resetPassword.email);
+            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.email == resetPassword.email);
+            var recruiter = await _context.Recruiters.FirstOrDefaultAsync(r => r.email == resetPassword.email);
+
+            if (candidate == null && admin == null && recruiter == null)
+            {
+                return BadRequest(new { Message = "Invalid email ..." });
+            }
+
+            // Verify that the new password and confirm password match
+            if (resetPassword.newPassword != resetPassword.confirmNewPassword)
+            {
+                return BadRequest(new { Message = "Passwords do not match" });
+            }
+
+            // Update the password in the database
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string hashedNewPassword = BCrypt.Net.BCrypt.HashPassword(resetPassword.newPassword, salt);
+
+            if (candidate != null)
+            {
+                candidate.pass = hashedNewPassword;
+                _context.Candidates.Update(candidate);
+            }
+            else if (admin != null)
+            {
+                admin.pass = hashedNewPassword;
+                _context.Admins.Update(admin);
+            }
+            else if (recruiter != null)
+            {
+                recruiter.pass = hashedNewPassword;
+                _context.Recruiters.Update(recruiter);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Password reset successfully" });
+        }
 
         [HttpPost("register/admin")]
         public async Task<IActionResult> RegisterAdmin([FromForm] Admin admin)
@@ -187,6 +230,44 @@ namespace RecruitingAPI.Controllers
                     // Add the candidate to the database
                     _context.Candidates.Add(newCandidate);
                     await _context.SaveChangesAsync();
+
+                    var candidateName = newCandidate.fName + " " + newCandidate.lName;
+                    // Send welcome email to the new candidate
+                    var message = new MimeMessage();
+                    message.From.Add(new MailboxAddress("Ultimate Solutions ERP", "ultimatesolutionserp.ma@gmail.com"));
+                    message.To.Add(new MailboxAddress(newCandidate.fName, newCandidate.email));
+                    message.Subject = "Bienvenue dans notre plateforme de recrutement";
+
+                    var builder = new BodyBuilder();
+
+                    // Get the path to the image file
+                    var imagePath = Path.Combine(_environment.WebRootPath, "Content", "Company", "us_logo.png");
+
+                    // Load the image from a file or URL
+                    var image = builder.LinkedResources.Add(imagePath);
+                    image.ContentId = MimeKit.Utils.MimeUtils.GenerateMessageId();
+
+                    builder.HtmlBody = $"<div style=\"background-color: #eee; padding: 20px;\">" +
+                                         $"<div style=\"text-align: left; width: 200px; height: 100px;\"><img src=\"cid:{image.ContentId}\" alt=\"Header Image\"></div>" +
+                                         $"<h1>Bienvenue dans notre plateforme de recrutement</h1>" +
+                                         $"<h3>Cher(e) {newCandidate.lName},</h3>" +
+                                         $"<p>Nous vous souhaitons la bienvenue dans notre plateforme de recrutement. Nous sommes ravis de vous compter parmi nos candidats potentiels. Votre inscription est un premier pas vers de nombreuses opportunités professionnelles.</p>" +
+                                         $"<p>N'hésitez pas à parcourir les offres d'emploi disponibles sur notre plateforme. Vous pouvez postuler aux offres qui correspondent à vos intérêts et à votre profil.</p>" +
+                                         $"<p>Si vous avez des questions ou avez besoin d'assistance, n'hésitez pas à nous contacter. Notre équipe se tient à votre disposition pour vous aider dans votre recherche.</p>" +
+                                         $"<p>Nous vous souhaitons beaucoup de succès dans votre parcours professionnel et nous espérons vous aider à trouver des opportunités passionnantes.</p>" +
+                                         $"<p>Cordialement,</p>" +
+                                         $"<p><i>L'équipe d'ULTIMATE SOLUTIONS ERP</i></p>" +
+                                         "</div>";
+
+                    message.Body = builder.ToMessageBody();
+
+                    using (var client = new MailKit.Net.Smtp.SmtpClient())
+                    {
+                        client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                        client.Authenticate("ultimatesolutionserp.ma@gmail.com", "qthoszbzgkslsdsu");
+                        client.Send(message);
+                        client.Disconnect(true);
+                    }
 
                     return Ok(new { Message = "Candidate registered successfully" });
                 }

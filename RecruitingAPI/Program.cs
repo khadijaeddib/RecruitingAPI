@@ -8,6 +8,9 @@ using Microsoft.OpenApi.Models;
 using RecruitingAPI.Context;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using SendGrid;
+using SendGrid.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +20,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 /*builder.Services.AddSwaggerGen();*/
-
 
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -48,6 +50,19 @@ builder.Services.AddSwaggerGen(c => {
     });
 });
 
+
+// Add the SendGrid API key
+/*var sendGridApiKey = builder.Configuration["SendGrid:ApiKey"];
+builder.Services.AddSingleton(sendGridApiKey);*/
+
+/*builder.Services.AddSendGrid(options =>
+{
+    options.ApiKey = builder.Configuration
+    .GetSection("SendGridEmailSettings").GetValue<string>("APIKey");
+});*/
+
+builder.Services.AddSingleton<ISendGridClient>(new SendGridClient("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"));
+
 using var hmac = new HMACSHA256();
 var key = Convert.ToBase64String(hmac.Key);
 
@@ -74,27 +89,6 @@ builder.Services.AddAuthentication(options =>
 
 });//sixth
 
-/*builder.Services.AddAuthentication(options => {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    // Adding Jwt Bearer
-    .AddJwtBearer(options => {
-        options.SaveToken = true;
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidAudience = "https://localhost:44324",
-            ValidIssuer = "https://localhost:44324",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"])),
-            ClockSkew = TimeSpan.Zero
-        };
-    });*/
-
-
 //Add Cors
 var myOrigins = "_myOrigins";
 builder.Services.AddCors(option =>
@@ -119,6 +113,7 @@ builder.Services.Configure<FormOptions>(o =>
 });
 
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -139,20 +134,6 @@ app.UseAuthentication(); //fourth
 app.UseAuthorization();
 
 app.UseStaticFiles(); //fifth
-
-/*app.UseStaticFiles(new StaticFileOptions()
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
-    RequestPath = new PathString("/Resources")
-});*/
-
-/*app.UseStaticFiles( new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider
-    (Path.Combine(builder.Environment.ContentRootPath, "wwwroot")),
-    RequestPath = "/wwwroot"
-}); //fifth*/
-
 
 app.MapControllers();
 
