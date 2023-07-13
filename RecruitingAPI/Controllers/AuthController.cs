@@ -248,9 +248,9 @@ namespace RecruitingAPI.Controllers
                     image.ContentId = MimeKit.Utils.MimeUtils.GenerateMessageId();
 
                     builder.HtmlBody = $"<div style=\"background-color: #eee; padding: 20px;\">" +
-                                         $"<div style=\"text-align: left; width: 200px; height: 100px;\"><img src=\"cid:{image.ContentId}\" alt=\"Header Image\"></div>" +
+                                         $"<div style=\"text-align: left; width: 200px; height: 100px; margin-bottom: 10px;\"><img src=\"cid:{image.ContentId}\" alt=\"Header Image\"></div>" +
                                          $"<h1>Bienvenue dans notre plateforme de recrutement</h1>" +
-                                         $"<h3>Cher(e) {newCandidate.lName},</h3>" +
+                                         $"<h3>Cher(e) {newCandidate.fName},</h3>" +
                                          $"<p>Nous vous souhaitons la bienvenue dans notre plateforme de recrutement. Nous sommes ravis de vous compter parmi nos candidats potentiels. Votre inscription est un premier pas vers de nombreuses opportunités professionnelles.</p>" +
                                          $"<p>N'hésitez pas à parcourir les offres d'emploi disponibles sur notre plateforme. Vous pouvez postuler aux offres qui correspondent à vos intérêts et à votre profil.</p>" +
                                          $"<p>Si vous avez des questions ou avez besoin d'assistance, n'hésitez pas à nous contacter. Notre équipe se tient à votre disposition pour vous aider dans votre recherche.</p>" +

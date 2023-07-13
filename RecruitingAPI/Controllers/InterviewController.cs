@@ -14,6 +14,7 @@ using MimeKit;
 using MailKit.Net.Smtp;
 using System.Security.Cryptography;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace RecruitingAPI.Controllers
 {
@@ -21,12 +22,13 @@ namespace RecruitingAPI.Controllers
     [ApiController]
     public class InterviewController : ControllerBase
     {
+        private AppDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        private readonly AppDbContext _context;
-
-        public InterviewController(AppDbContext appDbContext)
+        public InterviewController(AppDbContext context, IWebHostEnvironment environment)
         {
-            _context = appDbContext;
+            _context = context;
+            _environment = environment;
         }
 
         [HttpPost("addInterview")]
@@ -56,14 +58,25 @@ namespace RecruitingAPI.Controllers
 
 
                     var builder = new BodyBuilder();
-                    builder.HtmlBody = $"<h3>Cher(e) {data.Candidature.Candidate.lName},</h3><p>Nous sommes ravis de vous informer que votre entretien a été planifié avec succès pour le poste " +
+
+                    // Get the path to the image file
+                    var imagePath = Path.Combine(_environment.WebRootPath, "Content", "Interview", "interview_mail.jpg");
+
+                    // Load the image from a file or URL
+                    var image = builder.LinkedResources.Add(imagePath);
+                    image.ContentId = MimeKit.Utils.MimeUtils.GenerateMessageId();
+                    builder.HtmlBody = $"<div style=\"background-color: #eee; padding: 20px;\">" +
+                                         $"<div style=\"text-align: center; width: 100px; height: 100px;margin-bottom: 15px;\"><img src=\"cid:{image.ContentId}\" alt=\"Header Image\"></div>" +
+                                         $"<h1>Planification d'entretien</h1>" +
+                                         $"<h3>Cher(e) {data.Candidature.Candidate.fName},</h3><p>Nous sommes ravis de vous informer que votre entretien a été planifié avec succès pour le poste " +
                                          $"<b>{data.Candidature.Offer.title}</b> chez <b>{data.Candidature.Offer.Recruiter.Company.name}</b>. Veuillez trouver ci-dessous les détails de l'entretien :</p><hr>" +
-                                         $"<h6>Date de l'entretien : {data.interviewDate}</h6>" +
-                                         $"<h6>Format de l'entretien : {data.interviewFormat}</h6>" +
-                                         $"<h6>Adresse ou lien : {data.address}</h6><hr>" +
+                                         $"<h4>Date de l'entretien : {data.interviewDate}</h4>" +
+                                         $"<h4>Format de l'entretien : {data.interviewFormat}</h4>" +
+                                         $"<h4>Adresse ou lien : {data.address}</h4><hr>" +
                                          "<p>Nous vous recommandons de vous préparer en conséquence pour l'entretien en vous familiarisant avec l'entreprise et en révisant les compétences et les qualifications requises pour le poste.</p>" +
                                          $"<p>Si vous avez besoin de plus d'informations ou si vous rencontrez des problèmes, n'hésitez pas à nous contacter à l'adresse e-mail suivante : {data.Candidature.Offer.Recruiter.email}.</p>" +
-                                         "<p>Cordialement,</p>";
+                                         "<p>Cordialement,</p>" +
+                                         "</div>";
 
 
                     message.Body = builder.ToMessageBody();

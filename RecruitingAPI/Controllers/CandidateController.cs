@@ -87,6 +87,10 @@ namespace RecruitingAPI.Controllers
                 return NotFound();
             }
 
+            // Delete all candidatures associated with the candidate
+            var candidatures = _context.Candidatures.Where(c => c.idCand == id);
+            _context.Candidatures.RemoveRange(candidatures);
+
             string deleteImageFromFolder = Path.Combine(_environment.WebRootPath, "Content/Candidate/Images");
             string deleteLMFromFolder = Path.Combine(_environment.WebRootPath, "Content/Candidate/LMs");
             string deleteCVFromFolder = Path.Combine(_environment.WebRootPath, "Content/Candidate/CVs");
